@@ -35,3 +35,16 @@ export const addSchool = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getAllSchools = async (req, res, next) => {
+    try {
+      const schools = await School.find({}).sort({ name: 1 });
+      
+      res.status(200).json({
+        success: true,
+        data: schools
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
