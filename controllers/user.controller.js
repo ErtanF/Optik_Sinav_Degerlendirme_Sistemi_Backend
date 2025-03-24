@@ -139,3 +139,24 @@ export const approveTeacher = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getApproveTeacher = async (req, res, next) => {
+    // Onaylanması gereken kullanıcılar öğretmenlerin listelenmesi için
+
+    try {
+        // Kullanıcının okul ID'sine göre öğretmenleri filtrele
+        const teachers = await User.find({
+            role: "teacher",
+            isApproved: false,
+            school: req.user.schoolId // Sadece kullanıcının okulundaki öğretmenleri getir
+        }).populate("school");
+
+        res.status(200).json({
+            success: true,
+            data: teachers
+        });
+    } catch (error) {
+        next(error);
+    }
+
+}
