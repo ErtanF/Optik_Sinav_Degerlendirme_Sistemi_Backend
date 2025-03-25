@@ -8,6 +8,7 @@ import authRouter from "./routes/auth.routes.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import schoolRouter from "./routes/school.routes.js";
 import userRouter from "./routes/user.routes.js";
+import examRouter from "./routes/exam.routes.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/school', schoolRouter);
 app.use('/api/user', userRouter);
+app.use('/api/exam', examRouter);
 
 // Hata middleware'i
 app.use(errorMiddleware);
