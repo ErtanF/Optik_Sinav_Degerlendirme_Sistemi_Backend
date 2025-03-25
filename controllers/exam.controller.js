@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Exam from "../models/exam.js";
 import fs from "fs";
 
@@ -25,7 +26,7 @@ export const addExam = async (req, res, next) => {
         const newExam = await Exam.create({
             title,
             school,
-            createdBy,
+            createdBy : new mongoose.Types.ObjectId(createdBy),
             date,
             opticalFormImage: `/${filename}`,
             components

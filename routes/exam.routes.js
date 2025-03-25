@@ -1,5 +1,5 @@
 import express from "express";
-import {authenticateUser, isSuperAdmin, isSchoolAdmin, isTeacher} from "../middlewares/auth.middleware.js";
+import {authenticateUser} from "../middlewares/auth.middleware.js";
 import { addExam, deleteExam, updateExam, getExamById, getExamsByCreator } from "../controllers/exam.controller.js";
 
 const examRouter = express.Router();
