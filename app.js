@@ -11,6 +11,8 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 import schoolRouter from "./routes/school.routes.js";
 import userRouter from "./routes/user.routes.js";
 import examRouter from "./routes/exam.routes.js";
+import studentRouter from "./routes/student.routes.js";
+import classRouter from "./routes/class.routes.js";
 
 // __dirname işlevselliğini ES modules için ekleme
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +45,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/school', schoolRouter);
 app.use('/api/user', userRouter);
 app.use('/api/exam', examRouter);
+app.use('/api/student', studentRouter);
+app.use('/api/class', classRouter);
 
 // Hata middleware'i
 app.use(errorMiddleware);

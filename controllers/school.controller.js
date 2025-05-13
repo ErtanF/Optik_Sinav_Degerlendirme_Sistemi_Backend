@@ -22,7 +22,9 @@ export const addSchool = async (req, res, next) => {
             city,
             address,
             admin: null, // Henüz admin atanmamış
-            teachers: []
+            teachers: [],
+            classes: [],    // Sınıflar için boş dizi
+            students: []    // Öğrenciler için boş dizi
         });
 
         res.status(201).json({
@@ -36,15 +38,21 @@ export const addSchool = async (req, res, next) => {
     }
 };
 
+/**
+ * Tüm okulları listele
+ */
 export const getAllSchools = async (req, res, next) => {
     try {
-      const schools = await School.find({}).sort({ name: 1 });
-      
-      res.status(200).json({
-        success: true,
-        data: schools
-      });
+        // Okulları alfabetik sırala ve admin bilgilerini getir
+        const schools = await School.find({})
+            .populate("admin", "name email") // Admin bilgilerini getir
+            .sort({ name: 1 });
+
+        res.status(200).json({
+            success: true,
+            data: schools
+        });
     } catch (error) {
-      next(error);
+        next(error);
     }
-  };
+};

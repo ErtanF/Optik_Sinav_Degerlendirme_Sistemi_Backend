@@ -9,15 +9,14 @@ const UserSchema = new mongoose.Schema({
     enum: ["superadmin", "admin", "teacher"],
     required: true,
   },
-  school: { type: mongoose.Schema.Types.ObjectId, ref: "School" }, // Öğretmen ve Admin için
+  school: { type: mongoose.Schema.Types.ObjectId, ref: "School" }, // admin/teacher
   isApproved: {
     type: Boolean,
     default: false,
-    required: function() {
-      return this.role === "teacher"; // sadece öğretmenler için zorunlu
-    }
-  }, // Öğretmenin onay durumu, yalnızca öğretmenler için
+    required: function () {
+      return this.role === "teacher";
+    },
+  },
 }, { timestamps: true });
 
-// Modeli export et
 export default mongoose.model("User", UserSchema);

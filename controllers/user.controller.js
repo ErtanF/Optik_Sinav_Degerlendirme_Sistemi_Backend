@@ -64,7 +64,9 @@ export const addAdmin = async (req, res, next) => {
     }
 };
 
-// controllers/user.controller.js
+/**
+ * Öğretmen onaylama işlemi
+ */
 export const approveTeacher = async (req, res, next) => {
     try {
         const { teacherId } = req.body; // Onaylanacak öğretmenin ID'si
@@ -139,16 +141,17 @@ export const approveTeacher = async (req, res, next) => {
         next(error);
     }
 };
-
+/**
+ * Onaylanmamış öğretmenleri listeleme
+ */
 export const getApproveTeacher = async (req, res, next) => {
-    // Onaylanması gereken kullanıcılar öğretmenlerin listelenmesi için
-
     try {
         let filter = { role: "teacher", isApproved: false };
 
-        // Eğer kullanıcı 'superadmin' ise, okul filtresi uygulanmaz
+        // Eğer kullanıcı 'superadmin' ise, tüm onaylanmamış öğretmenleri getir
         if (req.user.role !== 'superadmin') {
-            filter.school = req.user.schoolId;  // Sadece kullanıcının okulundaki öğretmenleri getir
+            // Kullanıcının okulundaki öğretmenleri getir
+            filter.school = req.user.school;
         }
 
         // Öğretmenleri filtrele ve okul bilgilerini de dahil et
