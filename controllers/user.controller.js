@@ -162,3 +162,108 @@ export const getApproveTeacher = async (req, res, next) => {
         next(error);
     }
 };
+
+export const updateProfile = async (req, res, next) => {
+
+    try {
+        const { name, email } = req.body;
+        const userId = req.user.userId;
+
+        // Kullanıcıyı bul
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Email adresinin başka bir kullanıcıda olup olmadığını kontrol et
+        const existingUser = await User.findOne({ email });
+        if (existingUser && existingUser._id.toString() !== userId.toString()) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already in use"
+            });
+        }
+
+        // Kullanıcı bilgilerini güncelle
+        user.name = name;
+        user.email = email;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            data: user
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+export const getProfile = async (req, res, next) => {
+
+    try {
+        const userId = req.user._id;
+
+        // Kullanıcıyı bul
+        const user = await User.findById(userId).populate("school");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
+
+    } catch (error) {
+        next(error);
+    }
+
+
+}
+export const changePassword = async (req, res, next) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const userId = req.user.userId; // DİKKAT: userId!
+
+        // Kullanıcıyı bul
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "Old password is incorrect"
+            });
+        }
+
+        // Yeni şifreyi hashle
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Şifreyi güncelle
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Password changed successfully"
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
