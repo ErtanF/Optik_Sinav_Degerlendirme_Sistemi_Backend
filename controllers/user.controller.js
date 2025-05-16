@@ -145,13 +145,14 @@ export const approveTeacher = async (req, res, next) => {
  * Onaylanmamış öğretmenleri listeleme
  */
 export const getApproveTeacher = async (req, res, next) => {
-    try {
-        let filter = { role: "teacher", isApproved: false };
 
+    try {
+
+        let filter = { role: "teacher", isApproved: false };
         // Eğer kullanıcı 'superadmin' ise, tüm onaylanmamış öğretmenleri getir
         if (req.user.role !== 'superadmin') {
             // Kullanıcının okulundaki öğretmenleri getir
-            filter.school = req.user.school;
+            filter.school = req.user.schoolId;
         }
 
         // Öğretmenleri filtrele ve okul bilgilerini de dahil et
@@ -270,3 +271,31 @@ export const changePassword = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getApprovedTeachersBySchool = async (req, res, next) => {
+    try {
+        // Kullanıcının admin olup olmadığını kontrol et
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: "Only school admins can access this resource"
+            });
+        }
+
+        // Admin'in okulundaki onaylanmış öğretmenleri getir
+        const teachers = await User.find({
+            role: "teacher",
+            isApproved: true,
+            school: req.user.schoolId
+        }).populate("school");
+
+        res.status(200).json({
+            success: true,
+            data: teachers
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
