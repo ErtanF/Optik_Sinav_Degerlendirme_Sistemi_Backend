@@ -1,4 +1,5 @@
 import School from "../models/school.js";
+import mongoose from "mongoose";
 
 /**
  * Süperadmin tarafından okul ekleme (admin olmadan)
