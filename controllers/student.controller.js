@@ -9,7 +9,7 @@ import mongoose from "mongoose";
  */
 export const addStudent = async (req, res, next) => {
     try {
-        const { firstName, lastName, nationalId, studentNumber, classId, schoolId, bookletType, phone } = req.body;
+        const { firstName, lastName, nationalId, studentNumber, classId, schoolId } = req.body;
         const userId = req.user._id;
         // Sınıfın varlığını kontrol et
         const classExists = await Class.findById(classId);
@@ -46,9 +46,7 @@ export const addStudent = async (req, res, next) => {
             studentNumber,
             class: classId,
             school: schoolId,
-            createdBy: new mongoose.Types.ObjectId(userId),
-            bookletType,
-            phone
+            createdBy: new mongoose.Types.ObjectId(userId)
         });
 
         // Sınıfa öğrenci ekle
@@ -83,7 +81,7 @@ export const addStudentsFromList = async (req, res, next) => {
         const userId = req.user._id;
 
         for (let studentData of students) {
-            const { firstName, lastName, nationalId, studentNumber, classId, schoolId, bookletType, phone } = studentData;
+            const { firstName, lastName, nationalId, studentNumber, classId, schoolId,} = studentData;
 
             // Sınıfın varlığını kontrol et
             const classExists = await Class.findById(classId).session(session);
@@ -112,9 +110,7 @@ export const addStudentsFromList = async (req, res, next) => {
                     studentNumber,
                     class: classId,
                     school: schoolId,
-                    createdBy: new mongoose.Types.ObjectId(userId),
-                    bookletType,
-                    phone
+                    createdBy: new mongoose.Types.ObjectId(userId)
                 }],
                 { session }
             );
@@ -215,7 +211,7 @@ export const getStudentById = async (req, res, next) => {
 export const updateStudent = async (req, res, next) => {
     try {
         const { studentId } = req.params;
-        const { firstName, lastName, nationalId, studentNumber, classId, schoolId, bookletType, phone } = req.body;
+        const { firstName, lastName, nationalId, studentNumber, classId, schoolId } = req.body;
 
         // Öğrencinin varlığını kontrol et
         const studentExists = await Student.findById(studentId);
@@ -290,9 +286,7 @@ export const updateStudent = async (req, res, next) => {
                 studentNumber,
                 class: classId,
                 school: schoolId,
-                createdBy: studentExists.createdBy,
-                bookletType,
-                phone
+                createdBy: studentExists.createdBy
             },
             { new: true }
         );
