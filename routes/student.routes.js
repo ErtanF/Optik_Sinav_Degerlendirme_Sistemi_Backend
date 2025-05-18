@@ -8,7 +8,8 @@ import {
     getStudentByCreator,
     getStudentById,
     getStudentsBySchool,
-    getStudentsByClass
+    getStudentsByClass,
+    getStudents
 } from "../controllers/student.controller.js";
 
 const studentRouter = express.Router();
@@ -20,7 +21,8 @@ studentRouter.get("/class/:classId", authenticateUser, getStudentsByClass);
 
 // Temel CRUD işlemleri
 studentRouter.post("/", authenticateUser, addStudent);
-studentRouter.get("/", authenticateUser, getStudentByCreator);
+studentRouter.get("/", authenticateUser, getStudents);
+studentRouter.get("/creator", authenticateUser, getStudentByCreator);
 studentRouter.get("/:id", authenticateUser, getStudentById);
 studentRouter.put("/:id", authenticateUser, updateStudent);
 studentRouter.delete("/:id", authenticateUser, deleteStudent);

@@ -412,3 +412,20 @@ export const getStudentByCreator = async (req, res, next) => {
         next(error);
     }
 };
+
+
+export const getStudents = async (req, res, next) => {
+    try {
+        const students = await Student.find()
+            .populate("class")
+            .populate("school");
+
+        res.status(200).json({
+            success: true,
+            data: students
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
