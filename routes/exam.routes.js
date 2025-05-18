@@ -17,10 +17,10 @@ const examRouter = express.Router();
 // Spesifik route'lar daha önce gelmeli
 // Şablon (templates) routes
 examRouter.get("/templates", authenticateUser, getTemplatesByCreator);
-examRouter.get("/templates/school/:schoolId", authenticateUser, getTemplatesBySchool);
+examRouter.get("/templates/school", authenticateUser, getTemplatesBySchool);
 
 // Sınıf ve okula göre sınavlar
-examRouter.get("/school/:schoolId", authenticateUser, getExamsBySchool);
+examRouter.get("/school", authenticateUser, getExamsBySchool);
 examRouter.get("/class/:classId", authenticateUser, getExamsByClass);
 
 // CRUD işlemleri

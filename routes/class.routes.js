@@ -12,7 +12,7 @@ import {
 const classRouter = express.Router();
 
 // Spesifik route'lar önce gelmeli
-classRouter.get("/school/:schoolId", authenticateUser, getClassesBySchool);
+classRouter.get("/school", authenticateUser, getClassesBySchool);
 // Temel CRUD işlemleri
 classRouter.post("/", authenticateUser, addClass);
 classRouter.get("/", authenticateUser, getAllClasses);

@@ -10,10 +10,10 @@ import path from "path";
  */
 export const addExam = async (req, res, next) => {
     try {
+        const userId = req.user.userId;
+        const school = req.user.schoolId;
         const {
             title,
-            school,
-            createdBy,
             date,
             class: classId,
             studentIds = [],
@@ -81,7 +81,7 @@ export const addExam = async (req, res, next) => {
         const newExam = new Exam({
             title,
             school,
-            createdBy,
+            createdBy: new mongoose.Types.ObjectId(userId),
             date,
             class: classId || null,
             studentIds: studentIds.length > 0 ? studentIds : [],
@@ -109,7 +109,7 @@ export const addExam = async (req, res, next) => {
  */
 export const getExamsByCreator = async (req, res, next) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.userId;
 
         // Kullanıcı ID'sine göre sınavları getir
         const exams = await Exam.find({ createdBy: userId })
@@ -166,9 +166,9 @@ export const getExamById = async (req, res, next) => {
 export const updateExam = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const school = req.user.schoolId;
         const {
             title,
-            school,
             date,
             class: classId,
             studentIds = [],
@@ -314,7 +314,7 @@ export const deleteExam = async (req, res, next) => {
  */
 export const getExamsBySchool = async (req, res, next) => {
     try {
-        const { schoolId } = req.params;
+        const schoolId = req.user.schoolId;
 
         // Okul kontrolü
         const school = await School.findById(schoolId);
@@ -348,8 +348,7 @@ export const getExamsBySchool = async (req, res, next) => {
  */
 export const getTemplatesBySchool = async (req, res, next) => {
     try {
-        const { schoolId } = req.params;
-
+        const schoolId = req.user.schoolId;
         // Okul kontrolü
         const school = await School.findById(schoolId);
         if (!school) {
@@ -415,7 +414,7 @@ export const getExamsByClass = async (req, res, next) => {
  */
 export const getTemplatesByCreator = async (req, res, next) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.userId;
 
         // Kullanıcı ID'sine göre şablon sınavları getir
         const exams = await Exam.find({ createdBy: userId, isTemplate: true })

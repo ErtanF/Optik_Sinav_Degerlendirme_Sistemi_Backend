@@ -9,9 +9,10 @@ import mongoose from "mongoose";
  */
 export const addStudent = async (req, res, next) => {
     try {
-        const { firstName, lastName, nationalId, studentNumber, classId, schoolId } = req.body;
-        const userId = req.user._id;
-        // Sınıfın varlığını kontrol et
+        const { firstName, lastName, nationalId, studentNumber, classId } = req.body;
+        const userId = req.user.userId;
+        const schoolId = req.user.schoolId;
+// Sınıfın varlığını kontrol et
         const classExists = await Class.findById(classId);
         if (!classExists) {
             return res.status(404).json({
@@ -78,10 +79,10 @@ export const addStudentsFromList = async (req, res, next) => {
     try {
         const { students } = req.body; // Gelen öğrenci listesi
         const addedStudents = []; // Başarıyla eklenen öğrenciler
-        const userId = req.user._id;
-
+        const userId = req.user.userId;
+        const schoolId = req.user.schoolId;
         for (let studentData of students) {
-            const { firstName, lastName, nationalId, studentNumber, classId, schoolId,} = studentData;
+            const { firstName, lastName, nationalId, studentNumber, classId} = studentData;
 
             // Sınıfın varlığını kontrol et
             const classExists = await Class.findById(classId).session(session);
@@ -211,7 +212,8 @@ export const getStudentById = async (req, res, next) => {
 export const updateStudent = async (req, res, next) => {
     try {
         const { studentId } = req.params;
-        const { firstName, lastName, nationalId, studentNumber, classId, schoolId } = req.body;
+        const schoolId = req.user.schoolId;
+        const { firstName, lastName, nationalId, studentNumber, classId } = req.body;
 
         // Öğrencinin varlığını kontrol et
         const studentExists = await Student.findById(studentId);
@@ -354,7 +356,7 @@ export const deleteStudent = async (req, res, next) => {
  */
 export const getStudentsBySchool = async (req, res, next) => {
     try {
-        const { schoolId } = req.params;
+        const schoolId = req.user.schoolId;
 
         // Okulun varlığını kontrol et
         const schoolExists = await School.findById(schoolId);
@@ -385,10 +387,10 @@ export const getStudentsBySchool = async (req, res, next) => {
  */
 export const getStudentByCreator = async (req, res, next) => {
     try {
-        const creatorId = req.user._id;
-
+        const userId = req.user.userId;
+        console.log(userId);
         // Kullanıcının varlığını kontrol et
-        const userExists = await User.findById(creatorId);
+        const userExists = await User.findById(userId);
         if (!userExists) {
             return res.status(404).json({
                 success: false,
@@ -397,7 +399,7 @@ export const getStudentByCreator = async (req, res, next) => {
         }
 
         // Kullanıcıya ait öğrencileri getir
-        const students = await Student.find({ createdBy: creatorId })
+        const students = await Student.find({ createdBy: userId })
             .populate("class")
             .populate("school");
 

@@ -15,7 +15,7 @@ const studentRouter = express.Router();
 
 // Spesifik route'lar önce gelmeli
 studentRouter.post("/list", authenticateUser, addStudentsFromList);
-studentRouter.get("/school/:schoolId", authenticateUser, getStudentsBySchool);
+studentRouter.get("/school", authenticateUser, getStudentsBySchool);
 studentRouter.get("/class/:classId", authenticateUser, getStudentsByClass);
 
 // Temel CRUD işlemleri

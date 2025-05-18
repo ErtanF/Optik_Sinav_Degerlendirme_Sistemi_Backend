@@ -8,8 +8,8 @@ import Student from "../models/Student.js";
  */
 export const addClass = async (req, res, next) => {
     try {
-        const { name, grade, school } = req.body;
-
+        const { name, grade } = req.body;
+        const school = req.user.schoolId;
         // Okul var mı kontrol et
         const schoolExists = await School.findById(school);
         if (!schoolExists) {
@@ -104,7 +104,7 @@ export const getAllClasses = async (req, res, next) => {
  */
 export const getClassesBySchool = async (req, res, next) => {
     try {
-        const { schoolId } = req.params;
+        const schoolId = req.user.schoolId;
 
         // Okul var mı kontrol et
         const school = await School.findById(schoolId);
