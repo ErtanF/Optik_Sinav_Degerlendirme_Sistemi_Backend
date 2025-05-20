@@ -149,7 +149,7 @@ export const deleteSchool = async (req, res, next) => {
         }
 
         // Okulu sil
-        await school.remove();
+        await school.deleteOne()
 
         res.status(200).json({
             success: true,
