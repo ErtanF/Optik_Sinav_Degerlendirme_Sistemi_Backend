@@ -210,7 +210,7 @@ export const updateProfile = async (req, res, next) => {
 export const getProfile = async (req, res, next) => {
 
     try {
-        const userId = req.user._id;
+        const userId = req.user.userId;
 
         // Kullanıcıyı bul
         const user = await User.findById(userId).populate("school");
