@@ -9,7 +9,7 @@ userRouter.post("/approveTeacher", authenticateUser, isSchoolAdmin, approveTeach
 userRouter.get("/getApproveTeacher",authenticateUser , isSchoolAdmin, getApproveTeacher);
 userRouter.get("/getApprovedTeachersBySchool", authenticateUser, isSchoolAdmin, getApprovedTeachersBySchool);
 
-userRouter.get("/profile", authenticateUser, getProfile);
+userRouter.get("/", authenticateUser, getProfile);
 userRouter.put("/profile", authenticateUser, updateProfile);
 userRouter.put("/change-password", authenticateUser, changePassword);
 
