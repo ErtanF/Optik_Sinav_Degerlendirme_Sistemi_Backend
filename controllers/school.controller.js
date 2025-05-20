@@ -86,3 +86,78 @@ export const getSchoolById = async (req, res, next) => {
         next(error);
     }
 };
+
+export const updateSchool = async (req, res, next) => {
+    try {
+        const schoolId = req.params.id;
+        const { name, city, address } = req.body;
+
+        // MongoDB ObjectId formatını kontrol et
+        if (!mongoose.Types.ObjectId.isValid(schoolId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Geçersiz okul ID formatı"
+            });
+        }
+
+        // Okulu bul
+        const school = await School.findById(schoolId);
+        if (!school) {
+            return res.status(404).json({
+                success: false,
+                message: "Okul bulunamadı"
+            });
+        }
+
+        // Okul bilgilerini güncelle
+        school.name = name || school.name;
+        school.city = city || school.city;
+        school.address = address || school.address;
+
+        await school.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Okul bilgileri güncellendi",
+            data: school
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const deleteSchool = async (req, res, next) => {
+    try {
+        const schoolId = req.params.id;
+
+        // MongoDB ObjectId formatını kontrol et
+        if (!mongoose.Types.ObjectId.isValid(schoolId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Geçersiz okul ID formatı"
+            });
+        }
+
+        // Okulu bul
+        const school = await School.findById(schoolId);
+        if (!school) {
+            return res.status(404).json({
+                success: false,
+                message: "Okul bulunamadı"
+            });
+        }
+
+        // Okulu sil
+        await school.remove();
+
+        res.status(200).json({
+            success: true,
+            message: "Okul silindi"
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
