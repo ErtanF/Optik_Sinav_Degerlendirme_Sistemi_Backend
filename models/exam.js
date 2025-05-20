@@ -9,6 +9,7 @@ const ExamSchema = new mongoose.Schema({
     studentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" , default: null }],
     opticalFormImage: { type: String },
     components: { type: Array, required: true },
+    assignedClasses: [{ type: mongoose.Types.ObjectId, ref: 'Class' }],
     isTemplate: { type: Boolean, default: false },
 }, { timestamps: true });
 
