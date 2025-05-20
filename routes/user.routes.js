@@ -8,6 +8,7 @@ userRouter.post("/addadmin",authenticateUser,isSuperAdmin, addAdmin );
 userRouter.post("/approveTeacher", authenticateUser, isSchoolAdmin, approveTeacher);
 userRouter.get("/getApproveTeacher",authenticateUser , isSchoolAdmin, getApproveTeacher);
 userRouter.get("/getApprovedTeachersBySchool", authenticateUser, isSchoolAdmin, getApprovedTeachersBySchool);
+userRouter.get("/getAllApprovedTeachers", authenticateUser, isSuperAdmin, getApprovedTeachersBySchool);
 
 userRouter.get("/", authenticateUser, getProfile);
 userRouter.put("/profile", authenticateUser, updateProfile);

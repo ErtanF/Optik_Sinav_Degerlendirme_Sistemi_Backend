@@ -299,3 +299,28 @@ export const getApprovedTeachersBySchool = async (req, res, next) => {
     }
 };
 
+export const getAllApprovedTeachers = async (req, res, next) => {
+    try {
+        // Kullanıcının superadmin olup olmadığını kontrol et
+        if (req.user.role !== 'superadmin') {
+            return res.status(403).json({
+                success: false,
+                message: "Only superadmins can access this resource"
+            });
+        }
+
+        // Tüm onaylanmış öğretmenleri getir
+        const teachers = await User.find({
+            role: "teacher",
+            isApproved: true
+        }).populate("school");
+
+        res.status(200).json({
+            success: true,
+            data: teachers
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
