@@ -176,8 +176,13 @@ export const updateExam = async (req, res, next) => {
             studentIds = [],
             isTemplate = false,
             opticalFormImage,
-            components
+            components,
+            assignedClasses = [] // Sınıf atamalarını req.body'den alalım
         } = req.body;
+        
+        console.log('Güncelleme isteği alındı - Form ID:', id);
+        console.log('Gelen veriler:', req.body);
+        console.log('Gelen sınıf atamaları:', assignedClasses);
 
         // Sınavı ID'sine göre bul
         const exam = await Exam.findById(id);
@@ -187,6 +192,9 @@ export const updateExam = async (req, res, next) => {
                 message: "Exam not found"
             });
         }
+        
+        console.log('Mevcut form verisi:', exam);
+        console.log('Mevcut sınıf atamaları:', exam.assignedClasses);
 
         // Okul kontrolü yapılırsa
         if (school && school !== exam.school.toString()) {
@@ -250,8 +258,13 @@ export const updateExam = async (req, res, next) => {
             studentIds: studentIds.length > 0 ? studentIds : exam.studentIds,
             isTemplate: isTemplate !== undefined ? isTemplate : exam.isTemplate,
             opticalFormImage: savedImagePath,
-            components: components || exam.components
+            components: components || exam.components,
+            // Sınıf atamalarını ekle - gelen değer varsa onu kullan, yoksa mevcut değeri koru
+            assignedClasses: Array.isArray(assignedClasses) ? assignedClasses : exam.assignedClasses
         };
+        
+        console.log('Güncellenecek veriler:', updateData);
+        console.log('Güncellenecek sınıf atamaları:', updateData.assignedClasses);
 
         // Sınavı güncelle
         const updatedExam = await Exam.findByIdAndUpdate(
@@ -259,6 +272,9 @@ export const updateExam = async (req, res, next) => {
             updateData,
             { new: true, runValidators: true }
         );
+        
+        console.log('Güncelleme sonrası veriler:', updatedExam);
+        console.log('Güncelleme sonrası sınıf atamaları:', updatedExam.assignedClasses);
 
         res.status(200).json({
             success: true,
