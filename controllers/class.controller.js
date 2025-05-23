@@ -3,19 +3,15 @@ import Class from "../models/Class.js";
 import School from "../models/school.js";
 import Student from "../models/Student.js";
 
-/**
- * Yeni sınıf ekleme
- */
 export const addClass = async (req, res, next) => {
     try {
         const { name, grade } = req.body;
         const school = req.user.schoolId;
-        // Okul var mı kontrol et
         const schoolExists = await School.findById(school);
         if (!schoolExists) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -24,11 +20,10 @@ export const addClass = async (req, res, next) => {
         if (existingClass) {
             return res.status(400).json({
                 success: false,
-                message: "Class with this name already exists in this school"
+                message: "Bu okulda bu isimle bir sınıf zaten mevcut"
             });
         }
 
-        // Yeni sınıf oluştur
         const newClass = await Class.create({
             name,
             grade,
@@ -42,7 +37,7 @@ export const addClass = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "Class added successfully",
+            message: "Sınıf başarıyla eklendi",
             data: newClass
         });
 
@@ -51,9 +46,7 @@ export const addClass = async (req, res, next) => {
     }
 };
 
-/**
- * ID'ye göre sınıf getir
- */
+
 export const getClassById = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -65,7 +58,7 @@ export const getClassById = async (req, res, next) => {
         if (!classData) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf bulunamadı"
             });
         }
 
@@ -79,9 +72,6 @@ export const getClassById = async (req, res, next) => {
     }
 };
 
-/**
- * Tüm sınıfları listele
- */
 export const getAllClasses = async (req, res, next) => {
     try {
         const classes = await Class.find()
@@ -99,19 +89,15 @@ export const getAllClasses = async (req, res, next) => {
     }
 };
 
-/**
- * Okula göre sınıfları listele
- */
 export const getClassesBySchool = async (req, res, next) => {
     try {
         const schoolId = req.user.schoolId;
 
-        // Okul var mı kontrol et
         const school = await School.findById(schoolId);
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -130,20 +116,17 @@ export const getClassesBySchool = async (req, res, next) => {
     }
 };
 
-/**
- * Sınıf bilgilerini güncelle
- */
+
 export const updateClass = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { name, grade } = req.body;
 
-        // Sınıfın var olup olmadığını kontrol et
         const classExists = await Class.findById(id);
         if (!classExists) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf bulunamadı"
             });
         }
 
@@ -158,7 +141,7 @@ export const updateClass = async (req, res, next) => {
             if (duplicateClass) {
                 return res.status(400).json({
                     success: false,
-                    message: "Another class with this name already exists in this school"
+                    message: "Bu okulda bu isimle bir sınıf zaten mevcut"
                 });
             }
         }
@@ -172,7 +155,7 @@ export const updateClass = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Class updated successfully",
+            message: "Sınıf başarıyla güncellendi",
             data: updatedClass
         });
 
@@ -181,9 +164,7 @@ export const updateClass = async (req, res, next) => {
     }
 };
 
-/**
- * Sınıf silme işlemi
- */
+
 export const deleteClass = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -191,12 +172,11 @@ export const deleteClass = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        // Sınıfın var olup olmadığını kontrol et
         const classData = await Class.findById(id).session(session);
         if (!classData) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf bulunamadı"
             });
         }
 
@@ -226,7 +206,7 @@ export const deleteClass = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Class deleted successfully"
+            message: "Sınıf başarıyla silindi"
         });
 
     } catch (error) {

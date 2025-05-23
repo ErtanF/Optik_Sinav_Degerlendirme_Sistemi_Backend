@@ -8,14 +8,14 @@ const errorMiddleware = (err, req, res, next) => {
 
         // Mongoose Bad ObjectID
         if(err.name === "CastError") {
-            const message = `Resource not found.`;
+            const message = `Belirtilen kaynak bulunamadı.`;
             error = new Error(message);
             error.statusCode = 404;
         }
 
         // Mongoose Duplicate Key
         if(err.code === 11000) {
-            const message = "Duplicate field value entered";
+            const message = "Yinelenen alan değeri girişi";
             error = new Error(message);
             error.statusCode = 400;
         }

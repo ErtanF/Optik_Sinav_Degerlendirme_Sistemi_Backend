@@ -14,7 +14,7 @@ export const addAdmin = async (req, res, next) => {
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -22,7 +22,7 @@ export const addAdmin = async (req, res, next) => {
         if (school.admin) {
             return res.status(400).json({
                 success: false,
-                message: "This school already has an assigned admin"
+                message: "Bu okulun zaten atanmış bir yöneticisi var"
             });
         }
 
@@ -31,7 +31,7 @@ export const addAdmin = async (req, res, next) => {
         if (existingUser) {
             return res.status(409).json({
                 success: false,
-                message: "Admin already exists"
+                message: "Bu yönetici zaten kayıtlı."
             });
         }
 
@@ -55,7 +55,7 @@ export const addAdmin = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "School admin added successfully",
+            message: "Okul yöneticisi başarıyla eklendi",
             data: newAdmin
         });
 
@@ -76,7 +76,7 @@ export const approveTeacher = async (req, res, next) => {
         if (!teacher || teacher.role !== "teacher") {
             return res.status(404).json({
                 success: false,
-                message: "Teacher not found"
+                message: "Öğretmen bulunamadı"
             });
         }
 
@@ -84,7 +84,7 @@ export const approveTeacher = async (req, res, next) => {
         if (teacher.isApproved) {
             return res.status(400).json({
                 success: false,
-                message: "Teacher is already approved"
+                message: "Öğretmen zaten onaylanmış"
             });
         }
 
@@ -93,7 +93,7 @@ export const approveTeacher = async (req, res, next) => {
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -104,7 +104,7 @@ export const approveTeacher = async (req, res, next) => {
             if (req.user.schoolId.toString() !== teacher.school.toString()) {
                 return res.status(403).json({
                     success: false,
-                    message: "You can only approve teachers from your own school"
+                    message: "Sadece kendi okulunuzdaki öğretmenleri onaylayabilirsiniz"
                 });
             }
         }
@@ -112,7 +112,7 @@ export const approveTeacher = async (req, res, next) => {
         else if (req.user.role !== 'superadmin') {
             return res.status(403).json({
                 success: false,
-                message: "You do not have permission to approve teachers"
+                message: "Bu işlemi gerçekleştirmek için yeterli yetkiniz yok"
             });
         }
 
@@ -133,7 +133,7 @@ export const approveTeacher = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Teacher approved successfully",
+            message: "Öğretmen başarıyla onaylandı",
             data: teacher
         });
 
@@ -178,7 +178,7 @@ export const updateProfile = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "Kullanıcı bulunamadı"
             });
         }
 
@@ -187,7 +187,7 @@ export const updateProfile = async (req, res, next) => {
         if (existingUser && existingUser._id.toString() !== userId.toString()) {
             return res.status(409).json({
                 success: false,
-                message: "Email already in use"
+                message: "Bu email adresi başka bir kullanıcıya ait"
             });
         }
 
@@ -199,7 +199,7 @@ export const updateProfile = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Profile updated successfully",
+            message: "Profil başarıyla güncellendi",
             data: user
         });
 
@@ -217,7 +217,7 @@ export const getProfile = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "Kullanıcı bulunamadı"
             });
         }
 
@@ -242,7 +242,7 @@ export const changePassword = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "Kullanıcı bulunamadı"
             });
         }
 
@@ -250,7 +250,7 @@ export const changePassword = async (req, res, next) => {
         if (!isMatch) {
             return res.status(400).json({
                 success: false,
-                message: "Old password is incorrect"
+                message: "Mevcut şifre yanlış, lütfen tekrar deneyin"
             });
         }
 
@@ -264,7 +264,7 @@ export const changePassword = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Password changed successfully"
+            message: "Şifre başarıyla değiştirildi"
         });
 
     } catch (error) {
@@ -278,7 +278,7 @@ export const getApprovedTeachersBySchool = async (req, res, next) => {
         if (req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
-                message: "Only school admins can access this resource"
+                message: "Bu kaynağa sadece okul yöneticileri erişebilir"
             });
         }
 
@@ -305,7 +305,7 @@ export const getAllApprovedTeachers = async (req, res, next) => {
         if (req.user.role !== 'superadmin') {
             return res.status(403).json({
                 success: false,
-                message: "Only superadmins can access this resource"
+                message: "Bu kaynağa sadece süper yöneticiler erişebilir"
             });
         }
 

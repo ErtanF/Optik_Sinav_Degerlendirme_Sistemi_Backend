@@ -17,7 +17,7 @@ export const addStudent = async (req, res, next) => {
         if (!classExists) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf Bulunamadı"
             });
         }
 
@@ -26,7 +26,7 @@ export const addStudent = async (req, res, next) => {
         if (studentExists) {
             return res.status(400).json({
                 success: false,
-                message: "Student already exists"
+                message: "Bu öğrenci numarası daha önce alınmış."
             });
         }
 
@@ -35,7 +35,7 @@ export const addStudent = async (req, res, next) => {
         if (!schoolExists) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -60,7 +60,7 @@ export const addStudent = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "Student added successfully",
+            message: "Öğrenci başarıyla eklendi",
             data: newStudent
         });
 
@@ -87,19 +87,19 @@ export const addStudentsFromList = async (req, res, next) => {
             // Sınıfın varlığını kontrol et
             const classExists = await Class.findById(classId).session(session);
             if (!classExists) {
-                throw new Error(`Class with id ${classId} not found`);
+                throw new Error(`${classId} id'li sınıf bulunamadı`);
             }
 
             // Öğrenci numarasının varlığını kontrol et
             const studentExists = await Student.findOne({ studentNumber }).session(session);
             if (studentExists) {
-                throw new Error(`Student with number ${studentNumber} already exists`);
+                throw new Error(`${studentNumber} numaralı öğrenci zaten mevcut`);
             }
 
             // Okulun varlığını kontrol et
             const schoolExists = await School.findById(schoolId).session(session);
             if (!schoolExists) {
-                throw new Error(`School with id ${schoolId} not found`);
+                throw new Error(`${schoolId} id'li okul bulunamadı`);
             }
 
             // Öğrenci oluştur
@@ -132,7 +132,7 @@ export const addStudentsFromList = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "Students added successfully",
+            message: "Öğrenciler başarıyla eklendi",
             data: addedStudents
         });
 
@@ -159,7 +159,7 @@ export const getStudentsByClass = async (req, res, next) => {
         if (!classExists) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf bulunamadı"
             });
         }
 
@@ -192,7 +192,7 @@ export const getStudentById = async (req, res, next) => {
         if (!studentExists) {
             return res.status(404).json({
                 success: false,
-                message: "Student not found"
+                message: "Öğrenci bulunamadı"
             });
         }
 
@@ -220,7 +220,7 @@ export const updateStudent = async (req, res, next) => {
         if (!studentExists) {
             return res.status(404).json({
                 success: false,
-                message: "Student not found"
+                message: "Öğrenci bulunamadı"
             });
         }
 
@@ -229,7 +229,7 @@ export const updateStudent = async (req, res, next) => {
         if (!classExists) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf bulunamadı"
             });
         }
 
@@ -238,7 +238,7 @@ export const updateStudent = async (req, res, next) => {
         if (!schoolExists) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -295,7 +295,7 @@ export const updateStudent = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Student updated successfully",
+            message: "Öğrenci bilgileri güncellendi",
             data: updatedStudent
         });
 
@@ -316,7 +316,7 @@ export const deleteStudent = async (req, res, next) => {
         if (!studentExists) {
             return res.status(404).json({
                 success: false,
-                message: "Student not found"
+                message: "Öğrenci bulunamadı"
             });
         }
 
@@ -343,7 +343,7 @@ export const deleteStudent = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Student deleted successfully"
+            message: "Öğrenci başarıyla silindi"
         });
 
     } catch (error) {
@@ -363,7 +363,7 @@ export const getStudentsBySchool = async (req, res, next) => {
         if (!schoolExists) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -394,7 +394,7 @@ export const getStudentByCreator = async (req, res, next) => {
         if (!userExists) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "Kullanıcı bulunamadı"
             });
         }
 

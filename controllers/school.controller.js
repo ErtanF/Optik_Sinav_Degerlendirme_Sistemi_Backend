@@ -13,7 +13,7 @@ export const addSchool = async (req, res, next) => {
         if (existingSchool) {
             return res.status(400).json({
                 success: false,
-                message: "School already exists"
+                message: "Okul zaten kayıtlı."
             });
         }
 
@@ -30,7 +30,7 @@ export const addSchool = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "School added successfully, please assign an admin later.",
+            message: "Okul başarıyla eklendi, lütfen daha sonra bir yönetici atayın.",
             data: newSchool
         });
 
@@ -39,9 +39,7 @@ export const addSchool = async (req, res, next) => {
     }
 };
 
-/**
- * Tüm okulları listele
- */
+
 export const getAllSchools = async (req, res, next) => {
     try {
         // Okulları alfabetik sırala ve admin bilgilerini getir

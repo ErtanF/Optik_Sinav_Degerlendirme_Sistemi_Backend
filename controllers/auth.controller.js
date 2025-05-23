@@ -17,7 +17,7 @@ export const signUp = async (req, res, next) => {
         // Kullanıcı daha önce kayıt olmuş mu?
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            const error = new Error("User already exists");
+            const error = new Error("Kullanıcı zaten mevcut");
             error.statusCode = 409;
             throw error;
         }
@@ -25,7 +25,7 @@ export const signUp = async (req, res, next) => {
         // Okul kontrolü
         const school = await School.findById(schoolId);
         if (!school) {
-            const error = new Error("Selected school not found.");
+            const error = new Error("Seçili okul bulunamadı.");
             error.statusCode = 404;
             throw error;
         }
@@ -40,7 +40,7 @@ export const signUp = async (req, res, next) => {
                 name,
                 email,
                 password: hashedPassword,
-                role: "teacher", // Sadece öğretmen kayıt olabilir
+                role: "teacher",
                 school: schoolId,
                 isApproved: false // Müdür onayı bekliyor
             }],
@@ -52,7 +52,7 @@ export const signUp = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "Teacher registered successfully. Waiting for school admin approval.",
+            message: "Öğretmen kaydı tamamlandı. Okul yöneticisinin onayı bekleniyor.",
             data: {
                 user: newTeacher[0],
             }
@@ -72,14 +72,14 @@ export const signIn = async (req, res, next) => {
 
         const user = await User.findOne({ email }).populate("school");
         if (!user) {
-            const error = new Error("User not found");
+            const error = new Error("Kullanıcı bulunamadı");
             error.statusCode = 404;
             throw error;
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            const error = new Error("Password is incorrect");
+            const error = new Error("Girilen şifre yanlış,Lütfen tekrar deneyin.");
             error.statusCode = 401;
             throw error;
         }
@@ -88,7 +88,7 @@ export const signIn = async (req, res, next) => {
         if (user.role === "teacher" && !user.isApproved) {
             return res.status(403).json({
                 success: false,
-                message: "Your account is waiting for approval from the school admin.",
+                message: "Bu öğretmen henüz onaylanmamıştır. Lütfen okul yöneticinizle iletişime geçin.",
             });
         }
 
@@ -98,7 +98,7 @@ export const signIn = async (req, res, next) => {
                 email: user.email,
                 role: user.role,
                 schoolId: user.school ? user.school._id : null, // Okul ID'sini ekle
-                schoolName: user.school ? user.school.name : null // Okul adını ekle (opsiyonel)
+                schoolName: user.school ? user.school.name : null
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }

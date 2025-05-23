@@ -5,9 +5,7 @@ import Class from "../models/Class.js";
 import fs from "fs";
 import path from "path";
 
-/**
- * Sınav ekleme
- */
+
 export const addExam = async (req, res, next) => {
     try {
         const userId = req.user.userId;
@@ -28,7 +26,7 @@ export const addExam = async (req, res, next) => {
         if (!schoolExists) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -38,7 +36,7 @@ export const addExam = async (req, res, next) => {
             if (!classExists) {
                 return res.status(404).json({
                     success: false,
-                    message: "Class not found"
+                    message: "Sınıf bulunamadı"
                 });
             }
         }
@@ -48,7 +46,7 @@ export const addExam = async (req, res, next) => {
         if (existingExam) {
             return res.status(400).json({
                 success: false,
-                message: "An exam with this title already exists in this school."
+                message: "Bu okulda bu başlıkla bir sınav zaten mevcut."
             });
         }
 
@@ -70,10 +68,10 @@ export const addExam = async (req, res, next) => {
                 fs.writeFileSync(filepath, buffer);
                 savedImagePath = `/uploads/${filename}`;
             } catch (error) {
-                console.error("Image save error:", error);
+                console.error("Resim kaydetme hatası:", error);
                 return res.status(500).json({
                     success: false,
-                    message: "Error saving the optical form image"
+                    message: "Optik form görüntüsü kaydedilirken hata oluştu"
                 });
             }
         }
@@ -96,19 +94,17 @@ export const addExam = async (req, res, next) => {
 
         return res.status(201).json({
             success: true,
-            message: "Exam created successfully.",
+            message: "Sınav başarıyla oluşturuldu",
             data: newExam
         });
 
     } catch (error) {
-        console.error("Exam creation error:", error);
+        console.error("Sınav oluşturma hatası:", error);
         next(error);
     }
 };
 
-/**
- * Kullanıcının oluşturduğu sınavları getir
- */
+
 export const getExamsByCreator = async (req, res, next) => {
     try {
         const userId = req.user.userId;
@@ -131,9 +127,7 @@ export const getExamsByCreator = async (req, res, next) => {
     }
 };
 
-/**
- * Belirli bir sınavı getir
- */
+
 export const getExamById = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -148,7 +142,7 @@ export const getExamById = async (req, res, next) => {
         if (!exam) {
             return res.status(404).json({
                 success: false,
-                message: "Exam not found"
+                message: "Sınav bulunamadı"
             });
         }
 
@@ -162,9 +156,7 @@ export const getExamById = async (req, res, next) => {
     }
 };
 
-/**
- * Sınavı güncelle
- */
+
 export const updateExam = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -189,7 +181,7 @@ export const updateExam = async (req, res, next) => {
         if (!exam) {
             return res.status(404).json({
                 success: false,
-                message: "Exam not found"
+                message: "Sınav bulunamadı"
             });
         }
         
@@ -202,7 +194,7 @@ export const updateExam = async (req, res, next) => {
             if (!schoolExists) {
                 return res.status(404).json({
                     success: false,
-                    message: "School not found"
+                    message: "Okul bulunamadı"
                 });
             }
         }
@@ -213,7 +205,7 @@ export const updateExam = async (req, res, next) => {
             if (!classExists) {
                 return res.status(404).json({
                     success: false,
-                    message: "Class not found"
+                    message: "Sınıf bulunamadı"
                 });
             }
         }
@@ -244,7 +236,7 @@ export const updateExam = async (req, res, next) => {
                 fs.writeFileSync(filepath, buffer);
                 savedImagePath = `/uploads/${filename}`;
             } catch (error) {
-                console.error("Image update error:", error);
+                console.error("Resim güncelleme hatası:", error);
                 // Resim güncellenemezse de işleme devam et
             }
         }
@@ -278,19 +270,17 @@ export const updateExam = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Exam updated successfully.",
+            message: "Sınav başarıyla güncellendi",
             data: updatedExam
         });
 
     } catch (error) {
-        console.error("Exam update error:", error);
+        console.error("Sınav güncelleme hatası:", error);
         next(error);
     }
 };
 
-/**
- * Sınavı sil
- */
+
 export const deleteExam = async (req, res, next) => {
     try {
         const exam = await Exam.findById(req.params.id);
@@ -298,7 +288,7 @@ export const deleteExam = async (req, res, next) => {
         if (!exam) {
             return res.status(404).json({
                 success: false,
-                message: "Exam not found"
+                message: "Sınav bulunamadı"
             });
         }
 
@@ -310,7 +300,7 @@ export const deleteExam = async (req, res, next) => {
                     fs.unlinkSync(imagePath);
                 }
             } catch (error) {
-                console.error("Error deleting image file:", error);
+                console.error("Resim dosyası silinirken hata:", error);
                 // Dosya silinemese bile sınav silmeye devam et
             }
         }
@@ -319,7 +309,7 @@ export const deleteExam = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Exam deleted successfully."
+            message: "Sınav başarıyla silindi",
         });
 
     } catch (error) {
@@ -327,9 +317,7 @@ export const deleteExam = async (req, res, next) => {
     }
 };
 
-/**
- * Okula göre sınavları getir
- */
+
 export const getExamsBySchool = async (req, res, next) => {
     try {
         const schoolId = req.user.schoolId;
@@ -339,7 +327,7 @@ export const getExamsBySchool = async (req, res, next) => {
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -361,9 +349,7 @@ export const getExamsBySchool = async (req, res, next) => {
     }
 };
 
-/**
- * Okula göre şablon sınavları getir
- */
+
 export const getTemplatesBySchool = async (req, res, next) => {
     try {
         const schoolId = req.user.schoolId;
@@ -372,7 +358,7 @@ export const getTemplatesBySchool = async (req, res, next) => {
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "School not found"
+                message: "Okul bulunamadı"
             });
         }
 
@@ -393,9 +379,7 @@ export const getTemplatesBySchool = async (req, res, next) => {
     }
 };
 
-/**
- * Sınıfa göre sınavları getir
- */
+
 export const getExamsByClass = async (req, res, next) => {
     try {
         const { classId } = req.params;
@@ -405,7 +389,7 @@ export const getExamsByClass = async (req, res, next) => {
         if (!classExists) {
             return res.status(404).json({
                 success: false,
-                message: "Class not found"
+                message: "Sınıf bulunamadı"
             });
         }
 
@@ -427,9 +411,7 @@ export const getExamsByClass = async (req, res, next) => {
     }
 };
 
-/**
- * Kullanıcının oluşturduğu şablon sınavları getir
- */
+
 export const getTemplatesByCreator = async (req, res, next) => {
     try {
         const userId = req.user.userId;
