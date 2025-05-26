@@ -5,115 +5,82 @@ import Class from "../models/Class.js";
 import fs from "fs";
 import path from "path";
 
-
+/**
+ * Sınav ekleme
+ */
 export const addExam = async (req, res, next) => {
     try {
         const userId = req.user.userId;
-        const school = req.user.schoolId;
+        const schoolId = req.user.schoolId;
         const {
             title,
             date,
             class: classId,
-             assignedClasses = [],
+            assignedClasses = [],
             studentIds = [],
             isTemplate = false,
-            opticalFormImage,
-            components
+            opticalTemplateId
         } = req.body;
 
         // Okul kontrolü
-        const schoolExists = await School.findById(school);
+        const schoolExists = await School.findById(schoolId);
         if (!schoolExists) {
-            return res.status(404).json({
-                success: false,
-                message: "Okul bulunamadı"
-            });
+            return res.status(404).json({ success: false, message: "School not found" });
         }
 
-        // Eğer sınıf belirtilmişse kontrolü yap
+        // Sınıf kontrolü
         if (classId) {
             const classExists = await Class.findById(classId);
             if (!classExists) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Sınıf bulunamadı"
-                });
+                return res.status(404).json({ success: false, message: "Class not found" });
             }
         }
 
-        // Aynı başlıklı sınav kontrolü
-        const existingExam = await Exam.findOne({ title, school });
+        // Aynı başlık kontrolü
+        const existingExam = await Exam.findOne({ title, school: schoolId });
         if (existingExam) {
-            return res.status(400).json({
-                success: false,
-                message: "Bu okulda bu başlıkla bir sınav zaten mevcut."
-            });
+            return res.status(400).json({ success: false, message: "Exam with this title already exists." });
         }
 
-        // Optik görsel varsa dosyaya kaydet
-        let savedImagePath = null;
-        if (opticalFormImage && opticalFormImage.startsWith("data:image/")) {
-            try {
-                const base64Data = opticalFormImage.replace(/^data:image\/\w+;base64,/, "");
-                const buffer = Buffer.from(base64Data, "base64");
-                const uploadDir = path.resolve("uploads");
-
-                // uploads dizinini oluştur (yoksa)
-                if (!fs.existsSync(uploadDir)) {
-                    fs.mkdirSync(uploadDir, { recursive: true });
-                }
-
-                const filename = `optical_${Date.now()}.png`;
-                const filepath = path.join(uploadDir, filename);
-                fs.writeFileSync(filepath, buffer);
-                savedImagePath = `/uploads/${filename}`;
-            } catch (error) {
-                console.error("Resim kaydetme hatası:", error);
-                return res.status(500).json({
-                    success: false,
-                    message: "Optik form görüntüsü kaydedilirken hata oluştu"
-                });
-            }
-        }
-
-        // Yeni sınav nesnesi oluştur
         const newExam = new Exam({
             title,
-            school,
-            createdBy: new mongoose.Types.ObjectId(userId),
             date,
+            school: schoolId,
             class: classId || null,
-             assignedClasses: assignedClasses.length > 0 ? assignedClasses : [],
-            studentIds: studentIds.length > 0 ? studentIds : [],
+            assignedClasses,
+            studentIds,
             isTemplate,
-            opticalFormImage: savedImagePath,
-            components
+            opticalTemplate: opticalTemplateId,
+            createdBy: userId
         });
 
         await newExam.save();
 
         return res.status(201).json({
             success: true,
-            message: "Sınav başarıyla oluşturuldu",
+            message: "Exam created successfully.",
             data: newExam
         });
 
     } catch (error) {
-        console.error("Sınav oluşturma hatası:", error);
+        console.error("Exam creation error:", error);
         next(error);
     }
 };
 
-
+/**
+ * Kullanıcının oluşturduğu sınavları getir
+ */
 export const getExamsByCreator = async (req, res, next) => {
     try {
         const userId = req.user.userId;
 
-        // Kullanıcı ID'sine göre sınavları getir
+        // Kullanıcının oluşturduğu sınavları al
         const exams = await Exam.find({ createdBy: userId })
             .populate("school", "name city")
             .populate("createdBy", "name email")
             .populate("class", "name grade")
+            .populate("opticalTemplate", "name opticalFormImage") // yeni alan
             .sort({ date: -1 });
 
         res.status(200).json({
@@ -123,26 +90,30 @@ export const getExamsByCreator = async (req, res, next) => {
         });
 
     } catch (error) {
+        console.error("Get exams by creator error:", error);
         next(error);
     }
 };
 
 
+/**
+ * Belirli bir sınavı getir
+ */
 export const getExamById = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        // Sınavı ID'sine göre bul
         const exam = await Exam.findById(id)
             .populate("school", "name city address")
             .populate("createdBy", "name email")
             .populate("class", "name grade")
-            .populate("studentIds", "firstName lastName studentNumber bookletType");
+            .populate("studentIds", "firstName lastName studentNumber bookletType")
+            .populate("opticalTemplate", "name opticalFormImage components"); // 🔄 Yeni eklendi
 
         if (!exam) {
             return res.status(404).json({
                 success: false,
-                message: "Sınav bulunamadı"
+                message: "Exam not found"
             });
         }
 
@@ -152,135 +123,95 @@ export const getExamById = async (req, res, next) => {
         });
 
     } catch (error) {
+        console.error("Get exam by ID error:", error);
         next(error);
     }
 };
 
 
+/**
+ * Sınavı güncelle
+ */
 export const updateExam = async (req, res, next) => {
     try {
         const { id } = req.params;
         const school = req.user.schoolId;
+
         const {
             title,
             date,
             class: classId,
             studentIds = [],
             isTemplate = false,
-            opticalFormImage,
-            components,
-            assignedClasses = [] // Sınıf atamalarını req.body'den alalım
+            assignedClasses = [],
+            opticalTemplateId
         } = req.body;
-        
-        console.log('Güncelleme isteği alındı - Form ID:', id);
-        console.log('Gelen veriler:', req.body);
-        console.log('Gelen sınıf atamaları:', assignedClasses);
 
-        // Sınavı ID'sine göre bul
+        console.log("Gelen güncelleme isteği:", req.body);
+
+        // Sınavı bul
         const exam = await Exam.findById(id);
         if (!exam) {
             return res.status(404).json({
                 success: false,
-                message: "Sınav bulunamadı"
+                message: "Exam not found"
             });
         }
-        
-        console.log('Mevcut form verisi:', exam);
-        console.log('Mevcut sınıf atamaları:', exam.assignedClasses);
 
-        // Okul kontrolü yapılırsa
+        // Okul kontrolü
         if (school && school !== exam.school.toString()) {
             const schoolExists = await School.findById(school);
             if (!schoolExists) {
                 return res.status(404).json({
                     success: false,
-                    message: "Okul bulunamadı"
+                    message: "School not found"
                 });
             }
         }
 
-        // Sınıf kontrolü yapılırsa
+        // Sınıf kontrolü
         if (classId && classId !== exam.class?.toString()) {
             const classExists = await Class.findById(classId);
             if (!classExists) {
                 return res.status(404).json({
                     success: false,
-                    message: "Sınıf bulunamadı"
+                    message: "Class not found"
                 });
             }
         }
 
-        // Optik görseli güncelle
-        let savedImagePath = exam.opticalFormImage;
-        if (opticalFormImage && opticalFormImage.startsWith("data:image/")) {
-            try {
-                // Eski resmi sil (varsa)
-                if (exam.opticalFormImage) {
-                    const oldPath = path.join(process.cwd(), exam.opticalFormImage);
-                    if (fs.existsSync(oldPath)) {
-                        fs.unlinkSync(oldPath);
-                    }
-                }
-
-                // Yeni resmi kaydet
-                const base64Data = opticalFormImage.replace(/^data:image\/\w+;base64,/, "");
-                const buffer = Buffer.from(base64Data, "base64");
-                const uploadDir = path.resolve("uploads");
-
-                if (!fs.existsSync(uploadDir)) {
-                    fs.mkdirSync(uploadDir, { recursive: true });
-                }
-
-                const filename = `optical_${Date.now()}.png`;
-                const filepath = path.join(uploadDir, filename);
-                fs.writeFileSync(filepath, buffer);
-                savedImagePath = `/uploads/${filename}`;
-            } catch (error) {
-                console.error("Resim güncelleme hatası:", error);
-                // Resim güncellenemezse de işleme devam et
-            }
-        }
-
-        // Güncelleme yapılacak alanları belirle
+        // Güncellenebilir alanları hazırla
         const updateData = {
             title: title || exam.title,
-            school: school || exam.school,
             date: date || exam.date,
             class: classId || exam.class,
-            studentIds: studentIds.length > 0 ? studentIds : exam.studentIds,
+            studentIds: Array.isArray(studentIds) ? studentIds : exam.studentIds,
             isTemplate: isTemplate !== undefined ? isTemplate : exam.isTemplate,
-            opticalFormImage: savedImagePath,
-            components: components || exam.components,
-            // Sınıf atamalarını ekle - gelen değer varsa onu kullan, yoksa mevcut değeri koru
-            assignedClasses: Array.isArray(assignedClasses) ? assignedClasses : exam.assignedClasses
+            assignedClasses: Array.isArray(assignedClasses) ? assignedClasses : exam.assignedClasses,
+            opticalTemplate: opticalTemplateId || exam.opticalTemplate
         };
-        
-        console.log('Güncellenecek veriler:', updateData);
-        console.log('Güncellenecek sınıf atamaları:', updateData.assignedClasses);
 
-        // Sınavı güncelle
-        const updatedExam = await Exam.findByIdAndUpdate(
-            id,
-            updateData,
-            { new: true, runValidators: true }
-        );
-        
-        console.log('Güncelleme sonrası veriler:', updatedExam);
-        console.log('Güncelleme sonrası sınıf atamaları:', updatedExam.assignedClasses);
+        // Güncelle
+        const updatedExam = await Exam.findByIdAndUpdate(id, updateData, {
+            new: true,
+            runValidators: true
+        });
 
         res.status(200).json({
             success: true,
-            message: "Sınav başarıyla güncellendi",
+            message: "Exam updated successfully.",
             data: updatedExam
         });
 
     } catch (error) {
-        console.error("Sınav güncelleme hatası:", error);
+        console.error("Exam update error:", error);
         next(error);
     }
 };
 
-
+/**
+ * Sınavı sil
+ */
 export const deleteExam = async (req, res, next) => {
     try {
         const exam = await Exam.findById(req.params.id);
@@ -288,36 +219,27 @@ export const deleteExam = async (req, res, next) => {
         if (!exam) {
             return res.status(404).json({
                 success: false,
-                message: "Sınav bulunamadı"
+                message: "Exam not found"
             });
         }
 
-        // Optik form görselini sil (varsa)
-        if (exam.opticalFormImage) {
-            try {
-                const imagePath = path.join(process.cwd(), exam.opticalFormImage);
-                if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath);
-                }
-            } catch (error) {
-                console.error("Resim dosyası silinirken hata:", error);
-                // Dosya silinemese bile sınav silmeye devam et
-            }
-        }
-
+        // Sadece sınav kaydını sil
         await exam.deleteOne();
 
         res.status(200).json({
             success: true,
-            message: "Sınav başarıyla silindi",
+            message: "Exam deleted successfully."
         });
 
     } catch (error) {
+        console.error("Exam deletion error:", error);
         next(error);
     }
 };
 
-
+/**
+ * Okula göre sınavları getir
+ */
 export const getExamsBySchool = async (req, res, next) => {
     try {
         const schoolId = req.user.schoolId;
@@ -327,15 +249,16 @@ export const getExamsBySchool = async (req, res, next) => {
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "Okul bulunamadı"
+                message: "School not found"
             });
         }
 
-        // Okul ID'sine göre sınavları getir
+        // Sınavları getir
         const exams = await Exam.find({ school: schoolId })
             .populate("school", "name city")
             .populate("createdBy", "name email")
             .populate("class", "name grade")
+            .populate("opticalTemplate", "name opticalFormImage components") // 👈 Yeni
             .sort({ date: -1 });
 
         res.status(200).json({
@@ -345,11 +268,13 @@ export const getExamsBySchool = async (req, res, next) => {
         });
 
     } catch (error) {
+        console.error("Get exams by school error:", error);
         next(error);
     }
 };
-
-
+/**
+ * Okula göre şablon sınavları getir
+ */
 export const getTemplatesBySchool = async (req, res, next) => {
     try {
         const schoolId = req.user.schoolId;
@@ -358,7 +283,7 @@ export const getTemplatesBySchool = async (req, res, next) => {
         if (!school) {
             return res.status(404).json({
                 success: false,
-                message: "Okul bulunamadı"
+                message: "School not found"
             });
         }
 
@@ -379,25 +304,33 @@ export const getTemplatesBySchool = async (req, res, next) => {
     }
 };
 
-
+/**
+ * Sınıfa göre sınavları getir
+ */
 export const getExamsByClass = async (req, res, next) => {
     try {
         const { classId } = req.params;
 
-        // Sınıf kontrolü
+        // Sınıf var mı kontrol et
         const classExists = await Class.findById(classId);
         if (!classExists) {
             return res.status(404).json({
                 success: false,
-                message: "Sınıf bulunamadı"
+                message: "Class not found"
             });
         }
 
-        // Sınıf ID'sine göre sınavları getir
-        const exams = await Exam.find({ class: classId })
+        // Bu sınıfa atanmış olan sınavları bul: direkt atanmış veya assignedClasses içinde olanlar
+        const exams = await Exam.find({
+            $or: [
+                { class: classId },
+                { assignedClasses: classId }
+            ]
+        })
             .populate("school", "name city")
             .populate("createdBy", "name email")
             .populate("class", "name grade")
+            .populate("opticalTemplate", "name opticalFormImage components")
             .sort({ date: -1 });
 
         res.status(200).json({
@@ -407,11 +340,14 @@ export const getExamsByClass = async (req, res, next) => {
         });
 
     } catch (error) {
+        console.error("Get exams by class error:", error);
         next(error);
     }
 };
 
-
+/**
+ * Kullanıcının oluşturduğu şablon sınavları getir
+ */
 export const getTemplatesByCreator = async (req, res, next) => {
     try {
         const userId = req.user.userId;

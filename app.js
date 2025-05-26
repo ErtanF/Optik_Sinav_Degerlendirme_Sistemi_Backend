@@ -13,6 +13,7 @@ import userRouter from "./routes/user.routes.js";
 import examRouter from "./routes/exam.routes.js";
 import studentRouter from "./routes/student.routes.js";
 import classRouter from "./routes/class.routes.js";
+import opticalTemplateRouter from "./routes/opticaltemplate.routes.js";
 
 // __dirname işlevselliğini ES modules için ekleme
 const __filename = fileURLToPath(import.meta.url);
@@ -47,6 +48,7 @@ app.use('/api/user', userRouter);
 app.use('/api/exam', examRouter);
 app.use('/api/student', studentRouter);
 app.use('/api/class', classRouter);
+app.use('/api/opticaltemplate', opticalTemplateRouter);
 
 // Hata middleware'i
 app.use(errorMiddleware);

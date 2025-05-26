@@ -7,8 +7,7 @@ const ExamSchema = new mongoose.Schema({
     class: { type: mongoose.Schema.Types.ObjectId, ref: "Class" , default: null},
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     studentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" , default: null }],
-    opticalFormImage: { type: String },
-    components: { type: Array, required: true },
+    opticalTemplate: { type: mongoose.Schema.Types.ObjectId, ref: "OpticalTemplate", required: true },
     assignedClasses: [{ type: mongoose.Types.ObjectId, ref: 'Class' }],
     isTemplate: { type: Boolean, default: false },
 }, { timestamps: true });
